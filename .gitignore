@@ -30,3 +30,9 @@
 *.exe
 *.out
 *.app
+
+# target files
+msg-server
+
+# OS files
+.DS_Store
