@@ -30,3 +30,11 @@
 *.exe
 *.out
 *.app
+
+# OS files
+.DS_Store
+._*
+
+# python files
+__pycache__
+*.log
