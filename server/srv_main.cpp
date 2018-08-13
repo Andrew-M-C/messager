@@ -1,6 +1,8 @@
 
 #include "coevent.h"
 #include "cpp_tools.h"
+#include "srv_log.h"
+
 #include <stdio.h>
 #include <string>
 
@@ -11,42 +13,9 @@
 
 using namespace andrewmc::libcoevent;
 using namespace andrewmc::cpptools;
+using namespace andrewmc::messager::server;
 
 #define _CGI_PORT       (23333)
-
-#define LOG(fmt, args...)   _print("CGI: %s, %s, %d: "fmt, __FILE__, __func__, __LINE__, ##args)
-static ssize_t _print(const char *format, ...)
-{
-    char buff[1024];
-    va_list vaList;
-    size_t dateLen = 0;
-
-    tzset();
-    time_t currSec = time(0);
-    struct tm currTime;
-    struct tm *pTime = localtime(&currSec);
-    struct timeval currDayTime;
-
-    gettimeofday(&currDayTime, NULL);
-    if (pTime)
-    {
-        memcpy(&currTime, pTime, sizeof(currTime));
-        dateLen = sprintf(buff, "%04d-%02d-%02d, %02d:%02d:%02d.%06ld ", 
-                            currTime.tm_year + 1900, currTime.tm_mon + 1, currTime.tm_mday,
-                            currTime.tm_hour, currTime.tm_min, currTime.tm_sec, currDayTime.tv_usec);
-    }
-
-    va_start(vaList, format);
-    vsnprintf((char *)(buff + dateLen), sizeof(buff) - dateLen - 1, format, vaList);
-    va_end(vaList);
-
-    dateLen = strlen(buff);
-    buff[dateLen + 0] = '\n';
-    buff[dateLen + 1] = '\0';
-
-    return (write(1, buff, dateLen + 1));
-}
-
 
 // ==========
 #define __COROUTINE_ENTRY
@@ -63,40 +32,41 @@ static void _cgi_session(evutil_socket_t fd, Event *event, void *arg)
     int port = server->port();
 
     data_buff.ensure_buff_capacity(10240);
-    LOG("Server port: %d", port);
-    LOG("Remote client address: %s:%u", session.remote_addr().c_str(), session.remote_port());
+    log::INFO("Server port: %d", port);
+    log::INFO("Remote client address: %s:%u", session.remote_addr().c_str(), session.remote_port());
 
     // recv data
     status = session.recv(data_buff.mutable_raw_data(), data_buff.buff_capacity(), &data_len, 10.0);
     if (status.is_timeout()) {
-        LOG("Session timeout");
+        log::INFO("Session timeout");
         return;
     }
 
     // dump request data
     data_buff.set_raw_data_length(data_len);
     data_buff.append_nul();
-    LOG("Got request:\n(START)\n%s\n(ENDS)\n", (const char *)data_buff.c_data());
+    log::INFO("Got request:\n(START)\n%s\n(ENDS)\n", (const char *)data_buff.c_data());
 
     // parse data
     {
         std::vector<std::string> req_lines = ::andrewmc::cpptools::split_string(std::string((char *)data_buff.c_data()), "\r\n");
 
         if (req_lines.size() <= 5) {
-            LOG("insuffisent lines");
+            log::INFO("insuffisent lines");
             return;
         }
+        log::INFO("parameters count: %d", req_lines.size());
 
         // method
         {
             std::vector<std::string> method = ::andrewmc::cpptools::split_string(req_lines[0], " ");
             if (method.size() < 3) {
-                LOG("Method line illegal");
+                log::INFO("Method line illegal");
                 return;
             }
-            LOG("Method: %s", method[0].c_str());
-            LOG("URL: %s", method[1].c_str());
-            LOG("Ver: %s", method[2].c_str());
+            log::INFO("Method: %s", method[0].c_str());
+            log::INFO("URL: %s", method[1].c_str());
+            log::INFO("Ver: %s", method[2].c_str());
 
             req_para["URL"] = method[1];
         }
@@ -111,7 +81,7 @@ static void _cgi_session(evutil_socket_t fd, Event *event, void *arg)
             if (parts.size() < 2) {
                 continue;
             }
-            LOG("Param - '%s' : '%s'", parts[0].c_str(), parts[1].c_str());
+            log::INFO("Param - '%s' : '%s'", parts[0].c_str(), parts[1].c_str());
             req_para[parts[0]] = parts[1];
         }
     }
@@ -167,26 +137,11 @@ static void _cgi_session(evutil_socket_t fd, Event *event, void *arg)
         data_buff.append(tail_str, sizeof(tail_str) - 1);
 
         session.reply(data_buff.c_data(), data_buff.length(), &data_len);
-        LOG("Reply %u bytes", (unsigned)data_len);
-    }
-
-    // close session
-    {
-        LOG("Now close session to simulate afterward operation");
-        session.disconnect();
-
-        for (unsigned count = 3; count > 0; count --)
-        {
-            session.sleep(1);
-            LOG("Countdown %u", count - 1);
-        }
-
-        status = session.recv(data_buff.mutable_raw_data(), data_buff.buff_capacity(), &data_len, 10.0);
-        LOG("Test error after disconnection: %s", status.c_err_msg());
+        log::INFO("Reply %u bytes", (unsigned)data_len);
     }
 
     // end
-    LOG("Session ends");
+    log::INFO("Session ends");
     return;
 }
 
@@ -213,18 +168,18 @@ int main(int argc, char *argv[])
             port = _CGI_PORT;
         }
     }
-    LOG("CGI port %u", port);
+    log::INFO("CGI port %u", port);
 
     status = server->init_session_mode(base, _cgi_session, NetIPv4, port, server);
     if (FALSE == status.is_ok()) {
-        LOG("Init CGI server failed: %s", status.c_err_msg());
+        log::INFO("Init CGI server failed: %s", status.c_err_msg());
         goto END;
     }
 
     base->run();
 
 END:
-    LOG("CGI server base ends");
+    log::INFO("CGI server base ends");
     delete base;
     base = NULL;
     server = NULL;
