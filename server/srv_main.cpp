@@ -2,6 +2,7 @@
 #include "coevent.h"
 #include "cpp_tools.h"
 #include "srv_log.h"
+#include "rapidjson_tools.h"
 
 #include <stdio.h>
 #include <string>
@@ -45,17 +46,17 @@ static void _cgi_session(evutil_socket_t fd, Event *event, void *arg)
     // dump request data
     data_buff.set_raw_data_length(data_len);
     data_buff.append_nul();
-    log::INFO("Got request:\n(START)\n%s\n(ENDS)\n", (const char *)data_buff.c_data());
+    log::DEBUG("Got request:\n(START)\n%s\n(ENDS)\n", (const char *)data_buff.c_data());
 
     // parse data
     {
         std::vector<std::string> req_lines = ::andrewmc::cpptools::split_string(std::string((char *)data_buff.c_data()), "\r\n");
 
         if (req_lines.size() <= 5) {
-            log::INFO("insuffisent lines");
+            log::ERROR("insuffisent lines");
             return;
         }
-        log::INFO("parameters count: %d", req_lines.size());
+        log::DEBUG("parameters count: %d", req_lines.size());
 
         // method
         {
@@ -96,46 +97,70 @@ static void _cgi_session(evutil_socket_t fd, Event *event, void *arg)
         data_buff.append(str_buff, data_len);
 
         // body
-        time_t currSec = time(0);
-        struct tm currTime;
-        struct tm *pTime = localtime(&currSec);
-        if (pTime)
+        rapidjson::Document resp;
+        tools::json_init(resp);
+
+        // server time
         {
-            memcpy(&currTime, pTime, sizeof(currTime));
-            data_len = sprintf(str_buff, "{\"server time\":\"%04d-%02d-%02d, %02d:%02d:%02d\"", 
-                                currTime.tm_year + 1900, currTime.tm_mon + 1, currTime.tm_mday,
-                                currTime.tm_hour, currTime.tm_min, currTime.tm_sec);
-            data_buff.append(str_buff, data_len);
+            time_t currSec = time(0);
+            struct tm currTime;
+            struct tm *pTime = localtime(&currSec);
+
+            if (pTime)
+            {
+                memcpy(&currTime, pTime, sizeof(currTime));
+                data_len = sprintf(str_buff, "%04d-%02d-%02d, %02d:%02d:%02d", 
+                                    currTime.tm_year + 1900, currTime.tm_mon + 1, currTime.tm_mday,
+                                    currTime.tm_hour, currTime.tm_min, currTime.tm_sec);
+                tools::json_add_string(resp, "server time", str_buff);
+            }
         }
 
-        std::map<std::string, std::string>::iterator iter_addr = req_para.find("X-Real-IP");
-        std::map<std::string, std::string>::iterator iter_port = req_para.find("X-Real-Port");
-        if (iter_addr != req_para.end() && iter_port != req_para.end()) {
-            data_len = sprintf(str_buff, ", \"client\":\"%s:%s\"", iter_addr->second.c_str(), iter_port->second.c_str());
-            data_buff.append(str_buff, data_len);
-        }
-
-        std::map<std::string, std::string>::iterator iter_host = req_para.find("Host");
-        std::map<std::string, std::string>::iterator iter_cgi = req_para.find("URL");
-        if (iter_host != req_para.end() && iter_port != req_para.end()) {
-            data_len = sprintf(str_buff, ", \"URL\":\"https://%s%s\"", iter_host->second.c_str(), iter_cgi->second.c_str());
-            data_buff.append(str_buff, data_len);
-        }
-
-        std::map<std::string, std::string>::iterator iter_agent = req_para.find("User-Agent");
-        if (iter_agent != req_para.end()) {
-            data_len = sprintf(str_buff, ", \"User-Agent\":\"%s\"", iter_agent->second.c_str());
-            data_buff.append(str_buff, data_len);
-        }
-
+        // client infos
         {
-            data_len = sprintf(str_buff, ", \"Server ID\":\"%d\"", port);
-            data_buff.append(str_buff, data_len);
+            std::map<std::string, std::string>::iterator iter_addr = req_para.find("X-Real-IP");
+            std::map<std::string, std::string>::iterator iter_port = req_para.find("X-Real-Port");
+            if (iter_addr != req_para.end() && iter_port != req_para.end()) {
+                data_len = sprintf(str_buff, "%s:%s", iter_addr->second.c_str(), iter_port->second.c_str());
+                tools::json_add_string(resp, "server client", str_buff);
+            }
         }
 
-        const char tail_str[] = "}\r\n\r\n";
-        data_buff.append(tail_str, sizeof(tail_str) - 1);
+        // server infos
+        {
+            std::map<std::string, std::string>::iterator iter_host = req_para.find("Host");
+            std::map<std::string, std::string>::iterator iter_cgi = req_para.find("URL");
+            if (iter_host != req_para.end() && iter_cgi != req_para.end()) {
+                data_len = sprintf(str_buff, "https://%s%s", iter_host->second.c_str(), iter_cgi->second.c_str());
+                tools::json_add_string(resp, "URL", str_buff);
+            }
+        }
 
+        // User-Agent
+        {
+            std::map<std::string, std::string>::iterator iter_agent = req_para.find("User-Agent");
+            if (iter_agent != req_para.end()) {
+                tools::json_add_string(resp, "User-Agent", iter_agent->second.c_str());
+            }
+        }
+
+        // server port
+        {
+            tools::json_add_uint32(resp, "server ID", port);
+        }
+
+        // append
+        {
+            std::string jsonStr = tools::json_dump(resp);
+            size_t len = jsonStr.length();
+
+            data_buff.append(jsonStr.c_str(), len);
+
+            const char tail_str[] = "\r\n\r\n";
+            data_buff.append(tail_str, sizeof(tail_str) - 1);
+        }
+
+        // reply
         session.reply(data_buff.c_data(), data_buff.length(), &data_len);
         log::INFO("Reply %u bytes", (unsigned)data_len);
     }
