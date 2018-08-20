@@ -71,9 +71,10 @@ void andrewmc::messager::server::cgi::test::process(andrewmc::libcoevent::TCPSer
         }
     }
 
-    // server port
+    // server infomations
     {
-        tools::json_add_uint32(resp, "server ID", port);
+        rapidjson::Value &server_info = tools::json_add_object(resp, "server info");
+        tools::json_add_number(server_info, "server ID", port, resp);
     }
 
     // return
