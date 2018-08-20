@@ -1,4 +1,6 @@
 
+#include "coevent.h"
+
 #include <string>
 #include <stdio.h>
 #include <syslog.h>
@@ -23,6 +25,7 @@ void json_add_number(rapidjson::Document &dom, const char key[], uint64_t number
 void json_add_number(rapidjson::Document &dom, const char key[], double number);
 void json_add_number(rapidjson::Document &dom, const char key[], int number);
 void json_add_string(rapidjson::Document &dom, const char key[], const char *value);
+void json_add_bool(rapidjson::Document &dom, const char key[], BOOL value);
 rapidjson::Value &json_add_object(rapidjson::Document &dom, const char key[]);
 rapidjson::Value &json_add_array(rapidjson::Document &dom, const char key[]);
 
@@ -31,6 +34,7 @@ void json_add_number(rapidjson::Value &val, const char key[], uint64_t number, r
 void json_add_number(rapidjson::Value &val, const char key[], int64_t number, rapidjson::Document &dom);
 void json_add_number(rapidjson::Value &val, const char key[], int number, rapidjson::Document &dom);
 void json_add_string(rapidjson::Value &val, const char key[], const char *value, rapidjson::Document &dom);
+void json_add_bool(rapidjson::Value &val, const char key[], BOOL value, rapidjson::Document &dom);
 
 void json_array_push(rapidjson::Value &array, double number, rapidjson::Document &dom);
 void json_array_push(rapidjson::Value &array, uint64_t number, rapidjson::Document &dom);

@@ -143,7 +143,7 @@ static void _cgi_session(evutil_socket_t fd, Event *event, void *arg)
             if ((int)std::string::npos != para_start)
             {
                 url.assign(full_url, 0, para_start);
-                _parse_url_para(req_para, full_url.substr(para_start + 1, std::string::npos).c_str());
+                _parse_url_para(url_para, full_url.substr(para_start + 1, std::string::npos).c_str());
                 log::DEBUG("URL '%s', parameters '%s'", url.c_str(), full_url.substr(para_start + 1, std::string::npos).c_str());
             }
             else {
@@ -157,7 +157,7 @@ static void _cgi_session(evutil_socket_t fd, Event *event, void *arg)
         std::map<std::string, CgiProcessor>::iterator handler = g_cgi_processors.find(url);
         if (handler != g_cgi_processors.end())
         {
-            handler->second(server, session_para, req_para, resp, data_body);
+            handler->second(server, session_para, url_para, resp, data_body);
             data_len = sprintf(str_buff, "HTTP/1.1 200 OK\r\nContent-type:application/json\r\n\r\n");
             data_buff.append(str_buff, data_len);
         }

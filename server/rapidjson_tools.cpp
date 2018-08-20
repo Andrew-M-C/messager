@@ -89,6 +89,22 @@ void andrewmc::messager::server::tools::json_add_string(rapidjson::Document &dom
 }
 
 
+void andrewmc::messager::server::tools::json_add_bool(rapidjson::Document &dom, const char key[], BOOL value)
+{
+    if (!key) {
+        return;
+    }
+
+    rapidjson::Document::AllocatorType& allocator = dom.GetAllocator();
+    rapidjson::Value boolValue(value ? rapidjson::kTrueType : rapidjson::kFalseType);
+    rapidjson::Value strKey(rapidjson::kStringType);
+
+    strKey.SetString(key, strlen(key), allocator);
+    dom.AddMember(strKey, boolValue, allocator);
+    return;
+}
+
+
 std::string andrewmc::messager::server::tools::json_dump(rapidjson::Document &dom)
 {
     rapidjson::StringBuffer buffer;
@@ -208,6 +224,21 @@ void andrewmc::messager::server::tools::json_add_string(rapidjson::Value &val, c
     strKey.SetString(key, strlen(key), allocator);
     strValue.SetString(value, strlen(value), allocator);
     val.AddMember(strKey, strValue, allocator);
+    return;
+}
+
+
+void andrewmc::messager::server::tools::json_add_bool(rapidjson::Value &val, const char key[], BOOL value, rapidjson::Document &dom)
+{
+    if (!key) {
+        return;
+    }
+    rapidjson::Document::AllocatorType& allocator = dom.GetAllocator();
+    rapidjson::Value boolValue(value ? rapidjson::kTrueType : rapidjson::kFalseType);
+    rapidjson::Value strKey(rapidjson::kStringType);
+
+    strKey.SetString(key, strlen(key), allocator);
+    val.AddMember(strKey, boolValue, allocator);
     return;
 }
 
