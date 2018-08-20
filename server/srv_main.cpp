@@ -2,6 +2,7 @@
 #include "coevent.h"
 #include "cpp_tools.h"
 #include "srv_log.h"
+#include "srv_cgi.h"
 #include "rapidjson_tools.h"
 
 #include <stdio.h>
@@ -17,6 +18,23 @@ using namespace andrewmc::cpptools;
 using namespace andrewmc::messager::server;
 
 #define _CGI_PORT       (23333)
+
+// ==========
+#define __CGI_DEFINITIONS
+#ifdef __CGI_DEFINITIONS
+
+typedef void (*CgiProcessor)(TCPServer *, std::map<std::string, std::string> &, rapidjson::Document &);
+static std::map<std::string, CgiProcessor> g_cgi_processors;
+
+
+static void _init_cgi_processors()
+{
+    g_cgi_processors["/cgi-bin/test"] = cgi::test::process;
+    return;
+}
+
+
+#endif
 
 // ==========
 #define __COROUTINE_ENTRY
@@ -87,69 +105,45 @@ static void _cgi_session(evutil_socket_t fd, Event *event, void *arg)
         }
     }
 
-    // return data
+    // handle data
     {
         char str_buff[1024] = "";
-        data_buff.clear();
-
-        // header
-        data_len = sprintf(str_buff, "HTTP/1.1 200 OK\r\nContent-type:application/json\r\n\r\n");
-        data_buff.append(str_buff, data_len);
-
-        // body
         rapidjson::Document resp;
-        tools::json_init(resp);
+        data_buff.clear();
+        std::string full_url = req_para["URL"];
+        std::string url = "";
 
-        // server time
+        // check URL parameters
         {
-            time_t currSec = time(0);
-            struct tm currTime;
-            struct tm *pTime = localtime(&currSec);
-
-            if (pTime)
+            int para_start = full_url.find('?');
+            if ((int)std::string::npos != para_start)
             {
-                memcpy(&currTime, pTime, sizeof(currTime));
-                data_len = sprintf(str_buff, "%04d-%02d-%02d, %02d:%02d:%02d", 
-                                    currTime.tm_year + 1900, currTime.tm_mon + 1, currTime.tm_mday,
-                                    currTime.tm_hour, currTime.tm_min, currTime.tm_sec);
-                tools::json_add_string(resp, "server time", str_buff);
+                url.assign(full_url, 0, para_start);
+                log::DEBUG("URL '%s', parameters '%s'", url.c_str(), full_url.substr(para_start + 1, std::string::npos).c_str());
+            }
+            else {
+                url = full_url;
             }
         }
 
-        // client infos
+        tools::json_init(resp);
+        
+        // find handler
+        std::map<std::string, CgiProcessor>::iterator handler = g_cgi_processors.find(url);
+        if (handler != g_cgi_processors.end())
         {
-            std::map<std::string, std::string>::iterator iter_addr = req_para.find("X-Real-IP");
-            std::map<std::string, std::string>::iterator iter_port = req_para.find("X-Real-Port");
-            if (iter_addr != req_para.end() && iter_port != req_para.end()) {
-                data_len = sprintf(str_buff, "%s:%s", iter_addr->second.c_str(), iter_port->second.c_str());
-                tools::json_add_string(resp, "server client", str_buff);
-            }
+            handler->second(server, req_para, resp);
+            data_len = sprintf(str_buff, "HTTP/1.1 200 OK\r\nContent-type:application/json\r\n\r\n");
+            data_buff.append(str_buff, data_len);
+        }
+        else
+        {
+            log::ERROR("Unrecognized URL: %s", full_url.c_str());
+            data_len = sprintf(str_buff, "HTTP/1.1 404 Not Found\r\nContent-type:application/json\r\n\r\n");
+            data_buff.append(str_buff, data_len);
         }
 
-        // server infos
-        {
-            std::map<std::string, std::string>::iterator iter_host = req_para.find("Host");
-            std::map<std::string, std::string>::iterator iter_cgi = req_para.find("URL");
-            if (iter_host != req_para.end() && iter_cgi != req_para.end()) {
-                data_len = sprintf(str_buff, "https://%s%s", iter_host->second.c_str(), iter_cgi->second.c_str());
-                tools::json_add_string(resp, "URL", str_buff);
-            }
-        }
-
-        // User-Agent
-        {
-            std::map<std::string, std::string>::iterator iter_agent = req_para.find("User-Agent");
-            if (iter_agent != req_para.end()) {
-                tools::json_add_string(resp, "User-Agent", iter_agent->second.c_str());
-            }
-        }
-
-        // server port
-        {
-            tools::json_add_uint32(resp, "server ID", port);
-        }
-
-        // append
+        // append body
         {
             std::string jsonStr = tools::json_dump(resp);
             size_t len = jsonStr.length();
@@ -162,7 +156,8 @@ static void _cgi_session(evutil_socket_t fd, Event *event, void *arg)
 
         // reply
         session.reply(data_buff.c_data(), data_buff.length(), &data_len);
-        log::INFO("Reply %u bytes", (unsigned)data_len);
+        log::INFO("Reply data: %s", andrewmc::cpptools::dump_data_to_string(data_buff).c_str());
+        //log::INFO("Reply %u bytes", (unsigned)data_len);
     }
 
     // end
@@ -194,6 +189,8 @@ int main(int argc, char *argv[])
         }
     }
     log::INFO("CGI port %u", port);
+
+    _init_cgi_processors();
 
     status = server->init_session_mode(base, _cgi_session, NetIPv4, port, server);
     if (FALSE == status.is_ok()) {
