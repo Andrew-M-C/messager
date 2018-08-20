@@ -75,6 +75,11 @@ void andrewmc::messager::server::cgi::test::process(andrewmc::libcoevent::TCPSer
     {
         rapidjson::Value &server_info = tools::json_add_object(resp, "server info");
         tools::json_add_number(server_info, "server ID", port, resp);
+
+        rapidjson::Value &misc_info = tools::json_add_array(server_info, "misc info", resp);
+        tools::json_array_push(misc_info, "Hello", resp);
+        tools::json_array_push(misc_info, "array", resp);
+        tools::json_array_push(misc_info, 1234, resp);
     }
 
     // return
