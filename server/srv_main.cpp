@@ -23,7 +23,7 @@ using namespace andrewmc::messager::server;
 #define __CGI_DEFINITIONS
 #ifdef __CGI_DEFINITIONS
 
-typedef void (*CgiProcessor)(TCPServer *, std::map<std::string, std::string> &, rapidjson::Document &, andrewmc::cpptools::Data &);
+typedef void (*CgiProcessor)(TCPServer *, std::map<std::string, std::string> &, std::map<std::string, std::string> &, rapidjson::Document &, andrewmc::cpptools::Data &);
 static std::map<std::string, CgiProcessor> g_cgi_processors;
 
 
@@ -40,10 +40,22 @@ static void _init_cgi_processors()
 #define __COROUTINE_ENTRY
 #ifdef __COROUTINE_ENTRY
 
+static void _parse_url_para(std::map<std::string, std::string> &url_para, const char *para)
+{
+    if (NULL == para) {
+        return;
+    }
+
+    // TODO:
+    return;
+}
+
+
 static void _cgi_session(evutil_socket_t fd, Event *event, void *arg)
 {
     TCPSession &session = *((TCPSession *)event);
-    std::map<std::string, std::string> req_para;
+    std::map<std::string, std::string> session_para;
+    std::map<std::string, std::string> url_para;
     ::andrewmc::cpptools::Data data_buff;
     ::andrewmc::cpptools::Data data_body;
     struct Error status;
@@ -88,8 +100,8 @@ static void _cgi_session(evutil_socket_t fd, Event *event, void *arg)
             log::INFO("URL: %s", method[1].c_str());
             log::INFO("Ver: %s", method[2].c_str());
 
-            req_para["Method"] = method[0];
-            req_para["URL"] = method[1];
+            session_para["Method"] = method[0];
+            session_para["URL"] = method[1];
         }
 
         // header parameters
@@ -103,11 +115,11 @@ static void _cgi_session(evutil_socket_t fd, Event *event, void *arg)
                 continue;
             }
             log::INFO("Param - '%s' : '%s'", parts[0].c_str(), parts[1].c_str());
-            req_para[parts[0]] = parts[1];
+            session_para[parts[0]] = parts[1];
         }
 
         // body parameters
-        if (req_para["Method"] == "POST")
+        if (session_para["Method"] == "POST")
         {
             char *data_start = strstr((char *)data_buff.mutable_raw_data(), "\r\n\r\n");
             if (data_start) {
@@ -122,7 +134,7 @@ static void _cgi_session(evutil_socket_t fd, Event *event, void *arg)
         char str_buff[1024] = "";
         rapidjson::Document resp;
         data_buff.clear();
-        std::string full_url = req_para["URL"];
+        std::string full_url = session_para["URL"];
         std::string url = "";
 
         // check URL parameters
@@ -131,6 +143,7 @@ static void _cgi_session(evutil_socket_t fd, Event *event, void *arg)
             if ((int)std::string::npos != para_start)
             {
                 url.assign(full_url, 0, para_start);
+                _parse_url_para(req_para, full_url.substr(para_start + 1, std::string::npos).c_str());
                 log::DEBUG("URL '%s', parameters '%s'", url.c_str(), full_url.substr(para_start + 1, std::string::npos).c_str());
             }
             else {
@@ -144,7 +157,7 @@ static void _cgi_session(evutil_socket_t fd, Event *event, void *arg)
         std::map<std::string, CgiProcessor>::iterator handler = g_cgi_processors.find(url);
         if (handler != g_cgi_processors.end())
         {
-            handler->second(server, req_para, resp, data_body);
+            handler->second(server, session_para, req_para, resp, data_body);
             data_len = sprintf(str_buff, "HTTP/1.1 200 OK\r\nContent-type:application/json\r\n\r\n");
             data_buff.append(str_buff, data_len);
         }

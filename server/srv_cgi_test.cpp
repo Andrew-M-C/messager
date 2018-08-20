@@ -17,7 +17,11 @@
 #define __PUBLIC_FUNCTIONS
 #ifdef __PUBLIC_FUNCTIONS
 
-void andrewmc::messager::server::cgi::test::process(andrewmc::libcoevent::TCPServer *server, std::map<std::string, std::string> &req_para, rapidjson::Document &resp, andrewmc::cpptools::Data &post_data)
+void andrewmc::messager::server::cgi::test::process(andrewmc::libcoevent::TCPServer *server, 
+                                                std::map<std::string, std::string> &session_para, 
+                                                std::map<std::string, std::string> &req_para, 
+                                                rapidjson::Document &resp, 
+                                                andrewmc::cpptools::Data &post_data)
 {
     int port = server->port();
     char str_buff[1024] = "";
@@ -43,9 +47,9 @@ void andrewmc::messager::server::cgi::test::process(andrewmc::libcoevent::TCPSer
 
     // client infos
     {
-        std::map<std::string, std::string>::iterator iter_addr = req_para.find("X-Real-IP");
-        std::map<std::string, std::string>::iterator iter_port = req_para.find("X-Real-Port");
-        if (iter_addr != req_para.end() && iter_port != req_para.end())
+        std::map<std::string, std::string>::iterator iter_addr = session_para.find("X-Real-IP");
+        std::map<std::string, std::string>::iterator iter_port = session_para.find("X-Real-Port");
+        if (iter_addr != session_para.end() && iter_port != session_para.end())
         {
             sprintf(str_buff, "%s:%s", iter_addr->second.c_str(), iter_port->second.c_str());
             tools::json_add_string(resp, "server client", str_buff);
@@ -54,9 +58,9 @@ void andrewmc::messager::server::cgi::test::process(andrewmc::libcoevent::TCPSer
 
     // server infos
     {
-        std::map<std::string, std::string>::iterator iter_host = req_para.find("Host");
-        std::map<std::string, std::string>::iterator iter_cgi = req_para.find("URL");
-        if (iter_host != req_para.end() && iter_cgi != req_para.end())
+        std::map<std::string, std::string>::iterator iter_host = session_para.find("Host");
+        std::map<std::string, std::string>::iterator iter_cgi = session_para.find("URL");
+        if (iter_host != session_para.end() && iter_cgi != session_para.end())
         {
             sprintf(str_buff, "https://%s%s", iter_host->second.c_str(), iter_cgi->second.c_str());
             tools::json_add_string(resp, "URL", str_buff);
@@ -65,8 +69,8 @@ void andrewmc::messager::server::cgi::test::process(andrewmc::libcoevent::TCPSer
 
     // User-Agent
     {
-        std::map<std::string, std::string>::iterator iter_agent = req_para.find("User-Agent");
-        if (iter_agent != req_para.end()) {
+        std::map<std::string, std::string>::iterator iter_agent = session_para.find("User-Agent");
+        if (iter_agent != session_para.end()) {
             tools::json_add_string(resp, "User-Agent", iter_agent->second.c_str());
         }
     }
