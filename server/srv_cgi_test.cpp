@@ -17,11 +17,13 @@
 #define __PUBLIC_FUNCTIONS
 #ifdef __PUBLIC_FUNCTIONS
 
-void andrewmc::messager::server::cgi::test::process(andrewmc::libcoevent::TCPServer *server, std::map<std::string, std::string> &req_para, rapidjson::Document &resp)
+void andrewmc::messager::server::cgi::test::process(andrewmc::libcoevent::TCPServer *server, std::map<std::string, std::string> &req_para, rapidjson::Document &resp, andrewmc::cpptools::Data &post_data)
 {
     int port = server->port();
     char str_buff[1024] = "";
     tools::json_init(resp);
+
+    log::DEBUG("Got data body:\n%s", andrewmc::cpptools::dump_data_to_string(post_data).c_str());
 
     // server time
     {

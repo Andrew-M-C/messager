@@ -23,7 +23,7 @@ using namespace andrewmc::messager::server;
 #define __CGI_DEFINITIONS
 #ifdef __CGI_DEFINITIONS
 
-typedef void (*CgiProcessor)(TCPServer *, std::map<std::string, std::string> &, rapidjson::Document &);
+typedef void (*CgiProcessor)(TCPServer *, std::map<std::string, std::string> &, rapidjson::Document &, andrewmc::cpptools::Data &);
 static std::map<std::string, CgiProcessor> g_cgi_processors;
 
 
@@ -45,6 +45,7 @@ static void _cgi_session(evutil_socket_t fd, Event *event, void *arg)
     TCPSession &session = *((TCPSession *)event);
     std::map<std::string, std::string> req_para;
     ::andrewmc::cpptools::Data data_buff;
+    ::andrewmc::cpptools::Data data_body;
     struct Error status;
     size_t data_len = 0;
     TCPServer *server = (TCPServer *)arg;
@@ -64,7 +65,7 @@ static void _cgi_session(evutil_socket_t fd, Event *event, void *arg)
     // dump request data
     data_buff.set_raw_data_length(data_len);
     data_buff.append_nul();
-    log::DEBUG("Got request:\n(START)\n%s\n(ENDS)\n", (const char *)data_buff.c_data());
+    log::DEBUG("Got request:\n%s", andrewmc::cpptools::dump_data_to_string(data_buff).c_str());
 
     // parse data
     {
@@ -87,10 +88,11 @@ static void _cgi_session(evutil_socket_t fd, Event *event, void *arg)
             log::INFO("URL: %s", method[1].c_str());
             log::INFO("Ver: %s", method[2].c_str());
 
+            req_para["Method"] = method[0];
             req_para["URL"] = method[1];
         }
 
-        // parameters
+        // header parameters
         for (unsigned index = 1; index < req_lines.size(); ++index)
         {
             std::vector<std::string> parts = ::andrewmc::cpptools::split_string(req_lines[index], ": ");
@@ -102,6 +104,16 @@ static void _cgi_session(evutil_socket_t fd, Event *event, void *arg)
             }
             log::INFO("Param - '%s' : '%s'", parts[0].c_str(), parts[1].c_str());
             req_para[parts[0]] = parts[1];
+        }
+
+        // body parameters
+        if (req_para["Method"] == "POST")
+        {
+            char *data_start = strstr((char *)data_buff.mutable_raw_data(), "\r\n\r\n");
+            if (data_start) {
+                size_t header_len = (size_t)(data_start - (char *)data_buff.c_data());
+                data_body.copy(data_start + 4, data_buff.length() - header_len - 4);
+            }
         }
     }
 
@@ -132,7 +144,7 @@ static void _cgi_session(evutil_socket_t fd, Event *event, void *arg)
         std::map<std::string, CgiProcessor>::iterator handler = g_cgi_processors.find(url);
         if (handler != g_cgi_processors.end())
         {
-            handler->second(server, req_para, resp);
+            handler->second(server, req_para, resp, data_body);
             data_len = sprintf(str_buff, "HTTP/1.1 200 OK\r\nContent-type:application/json\r\n\r\n");
             data_buff.append(str_buff, data_len);
         }
@@ -156,7 +168,7 @@ static void _cgi_session(evutil_socket_t fd, Event *event, void *arg)
 
         // reply
         session.reply(data_buff.c_data(), data_buff.length(), &data_len);
-        log::INFO("Reply data: %s", andrewmc::cpptools::dump_data_to_string(data_buff).c_str());
+        log::DEBUG("Reply data: %s", andrewmc::cpptools::dump_data_to_string(data_buff).c_str());
         //log::INFO("Reply %u bytes", (unsigned)data_len);
     }
 

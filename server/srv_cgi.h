@@ -11,7 +11,7 @@ namespace cgi {
 // ==========
 // test
 namespace test {
-void process(andrewmc::libcoevent::TCPServer *server, std::map<std::string, std::string> &req_para, rapidjson::Document &resp);
+void process(andrewmc::libcoevent::TCPServer *server, std::map<std::string, std::string> &req_para, rapidjson::Document &resp, andrewmc::cpptools::Data &post_data);
 }
 
 }}}}

@@ -28,7 +28,7 @@ static const char *g_log_level_desp[] = {
 
 ssize_t andrewmc::messager::server::log::general_log(unsigned level, const char *file, const char *func, int line, const char *format, ...)
 {
-    char buff[1024];
+    char buff[10240];
     va_list vaList;
     size_t dateLen = 0;
     const char *log_level_string = NULL;
