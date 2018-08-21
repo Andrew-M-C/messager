@@ -40,13 +40,27 @@ static void _init_cgi_processors()
 #define __COROUTINE_ENTRY
 #ifdef __COROUTINE_ENTRY
 
-static void _parse_url_para(std::map<std::string, std::string> &url_para, const char *para)
+static void _parse_url_para(std::map<std::string, std::string> &url_para, const char *c_para)
 {
-    if (NULL == para) {
+    if (NULL == c_para) {
         return;
     }
 
-    // TODO:
+    std::string para_str(c_para);
+    std::vector<std::string> req_lines = ::andrewmc::cpptools::split_string(para_str, "&");
+
+    for (std::vector<std::string>::iterator each_pair = req_lines.begin();
+        each_pair != req_lines.end();
+        each_pair ++)
+    {
+        int and_pos = each_pair->find('=');
+        if (and_pos == (int)std::string::npos) {
+            continue;
+        }
+        url_para[each_pair->substr(0, and_pos)] = each_pair->substr(and_pos + 1, std::string::npos);
+        log::DEBUG("URL para: '%s' -- '%s'", each_pair->substr(0, and_pos).c_str(), each_pair->substr(and_pos + 1, std::string::npos).c_str());
+    }
+
     return;
 }
 
