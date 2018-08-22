@@ -9,7 +9,7 @@ LD  = ld
 TARGET_BIN = msg-server
 
 # flagsst 
-CFLAGS += -Wall -g -fPIC
+CFLAGS += -Wall -g -fPIC -std=c++11
 CPPFLAGS += $(CFLAGS)
 LDFLAGS += -lpthread -lcoevent -lpthread -lcolib
 

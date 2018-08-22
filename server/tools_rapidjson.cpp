@@ -1,19 +1,19 @@
 
-#include "rapidjson_tools.h"
+#include "tools_rapidjson.h"
 
 
 // ==========
 #define __DOM_OPERATIONS
 #ifdef __DOM_OPERATIONS
 
-void andrewmc::messager::server::tools::json_init(rapidjson::Document &dom)
+void andrewmc::messager::server::tools::json::init(rapidjson::Document &dom)
 {
     dom.SetObject();
     return;
 }
 
 
-void andrewmc::messager::server::tools::json_add_number(rapidjson::Document &dom, const char key[], int64_t number)
+void andrewmc::messager::server::tools::json::add_number(rapidjson::Document &dom, const char key[], int64_t number)
 {
     if (NULL == key) {
         return;
@@ -31,7 +31,7 @@ void andrewmc::messager::server::tools::json_add_number(rapidjson::Document &dom
 }
 
 
-void andrewmc::messager::server::tools::json_add_number(rapidjson::Document &dom, const char key[], uint64_t number)
+void andrewmc::messager::server::tools::json::add_number(rapidjson::Document &dom, const char key[], uint64_t number)
 {
     if (NULL == key) {
         return;
@@ -49,7 +49,7 @@ void andrewmc::messager::server::tools::json_add_number(rapidjson::Document &dom
 }
 
 
-void andrewmc::messager::server::tools::json_add_number(rapidjson::Document &dom, const char key[], double number)
+void andrewmc::messager::server::tools::json::add_number(rapidjson::Document &dom, const char key[], double number)
 {
     if (NULL == key) {
         return;
@@ -67,13 +67,13 @@ void andrewmc::messager::server::tools::json_add_number(rapidjson::Document &dom
 }
 
 
-void andrewmc::messager::server::tools::json_add_number(rapidjson::Document &dom, const char key[], int number)
+void andrewmc::messager::server::tools::json::add_number(rapidjson::Document &dom, const char key[], int number)
 {
-    return andrewmc::messager::server::tools::json_add_number(dom, key, (int64_t)number);
+    return andrewmc::messager::server::tools::json::add_number(dom, key, (int64_t)number);
 }
 
 
-void andrewmc::messager::server::tools::json_add_string(rapidjson::Document &dom, const char key[], const char *value)
+void andrewmc::messager::server::tools::json::add_string(rapidjson::Document &dom, const char key[], const char *value)
 {
     if (!(key && value)) {
         return;
@@ -89,7 +89,7 @@ void andrewmc::messager::server::tools::json_add_string(rapidjson::Document &dom
 }
 
 
-void andrewmc::messager::server::tools::json_add_bool(rapidjson::Document &dom, const char key[], BOOL value)
+void andrewmc::messager::server::tools::json::add_bool(rapidjson::Document &dom, const char key[], BOOL value)
 {
     if (!key) {
         return;
@@ -105,7 +105,7 @@ void andrewmc::messager::server::tools::json_add_bool(rapidjson::Document &dom, 
 }
 
 
-std::string andrewmc::messager::server::tools::json_dump(rapidjson::Document &dom)
+std::string andrewmc::messager::server::tools::json::dump(rapidjson::Document &dom)
 {
     rapidjson::StringBuffer buffer;
     rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
@@ -114,7 +114,7 @@ std::string andrewmc::messager::server::tools::json_dump(rapidjson::Document &do
 }
 
 
-rapidjson::Value &andrewmc::messager::server::tools::json_add_object(rapidjson::Document &dom, const char key[])
+rapidjson::Value &andrewmc::messager::server::tools::json::add_object(rapidjson::Document &dom, const char key[])
 {
     if (!key) {
         key = "unknown key";
@@ -129,7 +129,7 @@ rapidjson::Value &andrewmc::messager::server::tools::json_add_object(rapidjson::
 }
 
 
-rapidjson::Value &andrewmc::messager::server::tools::json_add_array(rapidjson::Document &dom, const char key[])
+rapidjson::Value &andrewmc::messager::server::tools::json::add_array(rapidjson::Document &dom, const char key[])
 {
     if (!key) {
         key = "unknown key";
@@ -151,7 +151,7 @@ rapidjson::Value &andrewmc::messager::server::tools::json_add_array(rapidjson::D
 #define __VALUE_OPERATIONS
 #ifdef __VALUE_OPERATIONS
 
-void andrewmc::messager::server::tools::json_add_number(rapidjson::Value &val, const char key[], double number, rapidjson::Document &dom)
+void andrewmc::messager::server::tools::json::add_number(rapidjson::Value &val, const char key[], double number, rapidjson::Document &dom)
 {
     if (!key) {
         return;
@@ -169,7 +169,7 @@ void andrewmc::messager::server::tools::json_add_number(rapidjson::Value &val, c
 }
 
 
-void andrewmc::messager::server::tools::json_add_number(rapidjson::Value &val, const char key[], uint64_t number, rapidjson::Document &dom)
+void andrewmc::messager::server::tools::json::add_number(rapidjson::Value &val, const char key[], uint64_t number, rapidjson::Document &dom)
 {
     if (!key) {
         return;
@@ -187,7 +187,7 @@ void andrewmc::messager::server::tools::json_add_number(rapidjson::Value &val, c
 }
 
 
-void andrewmc::messager::server::tools::json_add_number(rapidjson::Value &val, const char key[], int64_t number, rapidjson::Document &dom)
+void andrewmc::messager::server::tools::json::add_number(rapidjson::Value &val, const char key[], int64_t number, rapidjson::Document &dom)
 {
     if (!key) {
         return;
@@ -205,13 +205,13 @@ void andrewmc::messager::server::tools::json_add_number(rapidjson::Value &val, c
 }
 
 
-void andrewmc::messager::server::tools::json_add_number(rapidjson::Value &val, const char key[], int number, rapidjson::Document &dom)
+void andrewmc::messager::server::tools::json::add_number(rapidjson::Value &val, const char key[], int number, rapidjson::Document &dom)
 {
-    return andrewmc::messager::server::tools::json_add_number(val, key, (int64_t)number, dom);
+    return andrewmc::messager::server::tools::json::add_number(val, key, (int64_t)number, dom);
 }
 
 
-void andrewmc::messager::server::tools::json_add_string(rapidjson::Value &val, const char key[], const char *value, rapidjson::Document &dom)
+void andrewmc::messager::server::tools::json::add_string(rapidjson::Value &val, const char key[], const char *value, rapidjson::Document &dom)
 {
     if (!(key && value)) {
         return;
@@ -228,7 +228,7 @@ void andrewmc::messager::server::tools::json_add_string(rapidjson::Value &val, c
 }
 
 
-void andrewmc::messager::server::tools::json_add_bool(rapidjson::Value &val, const char key[], BOOL value, rapidjson::Document &dom)
+void andrewmc::messager::server::tools::json::add_bool(rapidjson::Value &val, const char key[], BOOL value, rapidjson::Document &dom)
 {
     if (!key) {
         return;
@@ -250,7 +250,7 @@ void andrewmc::messager::server::tools::json_add_bool(rapidjson::Value &val, con
 #define __ARRAY_OPERATIONS
 #ifdef __ARRAY_OPERATIONS
 
-void andrewmc::messager::server::tools::json_array_push(rapidjson::Value &array, double number, rapidjson::Document &dom)
+void andrewmc::messager::server::tools::json::array_push(rapidjson::Value &array, double number, rapidjson::Document &dom)
 {
     rapidjson::Document::AllocatorType& allocator = dom.GetAllocator();
     rapidjson::Value numValue(rapidjson::kNumberType);
@@ -260,7 +260,7 @@ void andrewmc::messager::server::tools::json_array_push(rapidjson::Value &array,
 }
 
 
-void andrewmc::messager::server::tools::json_array_push(rapidjson::Value &array, uint64_t number, rapidjson::Document &dom)
+void andrewmc::messager::server::tools::json::array_push(rapidjson::Value &array, uint64_t number, rapidjson::Document &dom)
 {
     rapidjson::Document::AllocatorType& allocator = dom.GetAllocator();
     rapidjson::Value numValue(rapidjson::kNumberType);
@@ -270,7 +270,7 @@ void andrewmc::messager::server::tools::json_array_push(rapidjson::Value &array,
 }
 
 
-void andrewmc::messager::server::tools::json_array_push(rapidjson::Value &array, int64_t number, rapidjson::Document &dom)
+void andrewmc::messager::server::tools::json::array_push(rapidjson::Value &array, int64_t number, rapidjson::Document &dom)
 {
     rapidjson::Document::AllocatorType& allocator = dom.GetAllocator();
     rapidjson::Value numValue(rapidjson::kNumberType);
@@ -280,13 +280,13 @@ void andrewmc::messager::server::tools::json_array_push(rapidjson::Value &array,
 }
 
 
-void andrewmc::messager::server::tools::json_array_push(rapidjson::Value &array, int number, rapidjson::Document &dom)
+void andrewmc::messager::server::tools::json::array_push(rapidjson::Value &array, int number, rapidjson::Document &dom)
 {
-    return andrewmc::messager::server::tools::json_array_push(array, (int64_t)number, dom);
+    return andrewmc::messager::server::tools::json::array_push(array, (int64_t)number, dom);
 }
 
 
-void andrewmc::messager::server::tools::json_array_push(rapidjson::Value &array, const char str[], rapidjson::Document &dom)
+void andrewmc::messager::server::tools::json::array_push(rapidjson::Value &array, const char str[], rapidjson::Document &dom)
 {
     if (!str) {
         return;
@@ -306,7 +306,7 @@ void andrewmc::messager::server::tools::json_array_push(rapidjson::Value &array,
 #define __ADD_ARRAR_OR_OBJ_IN_OBJ
 #ifdef __ADD_ARRAR_OR_OBJ_IN_OBJ
 
-rapidjson::Value &andrewmc::messager::server::tools::json_add_object(rapidjson::Value &val, const char key[], rapidjson::Document &dom)
+rapidjson::Value &andrewmc::messager::server::tools::json::add_object(rapidjson::Value &val, const char key[], rapidjson::Document &dom)
 {
     if (!key) {
         key = "unknown key";
@@ -321,7 +321,7 @@ rapidjson::Value &andrewmc::messager::server::tools::json_add_object(rapidjson::
 }
 
 
-rapidjson::Value &andrewmc::messager::server::tools::json_add_array(rapidjson::Value &val, const char key[], rapidjson::Document &dom)
+rapidjson::Value &andrewmc::messager::server::tools::json::add_array(rapidjson::Value &val, const char key[], rapidjson::Document &dom)
 {
     if (!key) {
         key = "unknown key";

@@ -3,7 +3,7 @@
 #include "cpp_tools.h"
 #include "srv_log.h"
 #include "srv_cgi.h"
-#include "rapidjson_tools.h"
+#include "tools_rapidjson.h"
 
 #include <stdio.h>
 #include <string>
@@ -165,7 +165,7 @@ static void _cgi_session(evutil_socket_t fd, Event *event, void *arg)
             }
         }
 
-        tools::json_init(resp);
+        tools::json::init(resp);
         
         // find handler
         std::map<std::string, CgiProcessor>::iterator handler = g_cgi_processors.find(url);
@@ -184,7 +184,7 @@ static void _cgi_session(evutil_socket_t fd, Event *event, void *arg)
 
         // append body
         {
-            std::string jsonStr = tools::json_dump(resp);
+            std::string jsonStr = tools::json::dump(resp);
             size_t len = jsonStr.length();
 
             data_buff.append(jsonStr.c_str(), len);
