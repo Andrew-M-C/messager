@@ -17,7 +17,7 @@ using namespace andrewmc::libcoevent;
 using namespace andrewmc::cpptools;
 using namespace andrewmc::messager::server;
 
-#define _CGI_PORT       (23333)
+#define _CGI_PORT       (32222)
 
 // ==========
 #define __CGI_DEFINITIONS
