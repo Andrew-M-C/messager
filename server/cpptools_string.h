@@ -36,6 +36,7 @@ public:
     int length() const;
     Unichar_t get_char(int index) const throw(std::out_of_range);
     Unichar_t operator [] (int index) const throw(std::out_of_range);
+
     void operator = (const char *c_utf8_string);
     void operator = (const ::std::string &utf8_string);
     void operator = (const UTF8String &string);
@@ -44,13 +45,9 @@ public:
     bool operator == (const ::std::string &utf8_string) const;
     bool operator == (const UTF8String &string) const;
 
-    UTF8String operator + (const char *c_utf8_string);
-    UTF8String operator + (const ::std::string &utf8_string);
-    UTF8String operator + (const UTF8String &string);
-
-    UTF8String &operator += (const char *c_utf8_string);
-    UTF8String &operator += (const ::std::string &utf8_string);
-    UTF8String &operator += (const UTF8String &string);
+    UTF8String operator + (const char *c_utf8_string) const;
+    UTF8String operator + (const ::std::string &utf8_string) const;
+    UTF8String operator + (const UTF8String &string) const;
 
     const char *c_str() const;
     const ::std::string &string() const;

@@ -415,8 +415,140 @@ void andrewmc::cpptools::string::UTF8String::assign(const UTF8String &string)
 }
 
 
+void andrewmc::cpptools::string::UTF8String::assign(const char *c_utf8_string)
+{
+    int len = (c_utf8_string) ? strlen(c_utf8_string) : 0;
+    _parse(c_utf8_string, len);
+    return;
+}
+
+
+void andrewmc::cpptools::string::UTF8String::assign(const char *c_utf8_string, int len)
+{
+    _parse(c_utf8_string, len);
+    return;
+}
+
+
+void andrewmc::cpptools::string::UTF8String::assign(const ::std::string &utf8_string)
+{
+    _parse(utf8_string.c_str(), utf8_string.length());
+    return;
+}
+
+
+void andrewmc::cpptools::string::UTF8String::operator=(const char *c_utf8_string)
+{
+    assign(c_utf8_string);
+    return;
+}
+
+
+void andrewmc::cpptools::string::UTF8String::operator=(const ::std::string &utf8_string)
+{
+    assign(utf8_string);
+    return;
+}
+
+
+void andrewmc::cpptools::string::UTF8String::operator=(const UTF8String &string)
+{
+    assign(string);
+    return;
+}
+
+
 #endif  // end of __COPY_FUNCTION
 
+
+// ==========
+#define __UTF8_CHAR_ACCESS_FUNCTIONS
+#ifdef __UTF8_CHAR_ACCESS_FUNCTIONS
+
+Unichar_t andrewmc::cpptools::string::UTF8String::get_char(int index) const throw(std::out_of_range)
+{
+    if (index >= this->length())
+    {
+        char buff[64];
+        snprintf(buff, sizeof(buff), "accesing %d out of range %d", index, this->length());
+        throw std::out_of_range(std::string(buff));
+        return 0;
+    }
+
+    Unichar_t *array = (Unichar_t *)_unichar_buff.c_data();
+    return array[index];
+}
+
+
+Unichar_t andrewmc::cpptools::string::UTF8String::operator[](int index) const throw(std::out_of_range)
+{
+    return this->get_char(index);
+}
+
+
+#endif  // end of __UTF8_CHAR_ACCESS_FUNCTIONS
+
+
+// ==========
+#define __UTF8_COMPARAING_FUNCTIONS
+#ifdef __UTF8_COMPARAING_FUNCTIONS
+
+bool andrewmc::cpptools::string::UTF8String::operator==(const char *c_utf8_string) const
+{
+    if (NULL == c_utf8_string) {
+        return false;
+    }
+
+    size_t len = strlen(c_utf8_string);
+    if (len != (size_t)_orig_str.length()) {
+        return false;
+    }
+
+    return 0 == memcmp(c_utf8_string, _orig_str.c_str(), len);
+}
+
+
+bool andrewmc::cpptools::string::UTF8String::operator==(const ::std::string &utf8_string) const
+{
+    return utf8_string == _orig_str;
+}
+
+
+bool andrewmc::cpptools::string::UTF8String::operator==(const UTF8String &string) const
+{
+    return string.string() == _orig_str;
+}
+
+
+#endif  // end of __UTF8_COMPARAING_FUNCTIONS
+
+
+// ==========
+#define __UTF8_PLUS_FUNCTIONS
+#ifdef __UTF8_PLUS_FUNCTIONS
+
+UTF8String andrewmc::cpptools::string::UTF8String::operator+(const char *c_utf8_string) const
+{
+    std::string new_string = _orig_str + std::string(c_utf8_string);
+    return UTF8String(new_string);
+}
+
+
+UTF8String andrewmc::cpptools::string::UTF8String::operator+(const ::std::string &utf8_string) const
+{
+    std::string new_string = _orig_str + utf8_string;
+    return UTF8String(new_string);
+}
+
+
+UTF8String andrewmc::cpptools::string::UTF8String::operator+(const UTF8String &string) const
+{
+    std::string new_string = _orig_str + string.string();
+    return UTF8String(new_string);
+}
+
+
+#endif
 
 // ==========
 #define __MISC_FUNCTIONS
