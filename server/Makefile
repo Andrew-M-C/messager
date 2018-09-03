@@ -18,9 +18,9 @@ C_SRCS = $(wildcard ./*.c)
 CPP_SRCS = $(wildcard ./*.cpp)
 ASM_SRCS = $(wildcard ./*.S)
 
-C_OBJS = $(C_SRCS:.c=.o)
-CPP_OBJS = $(CPP_SRCS:.cpp=.o)
-ASM_OBJS = $(ASM_SRCS:.S=.o)
+C_OBJS = $(C_SRCS:.c=.c.o)
+CPP_OBJS = $(CPP_SRCS:.cpp=.cpp.o)
+ASM_OBJS = $(ASM_SRCS:.S=.S.o)
 
 NULL ?=#
 ifneq ($(strip $(CPP_OBJS)), $(NULL))
@@ -47,30 +47,29 @@ all: $(TARGET_BIN)
 -include $(C_OBJS:.o=.d)
 -include $(CPP_OBJS:.o=.d)
 
-$(CPP_OBJS): $(CPP_OBJS:.o=.cpp)
-	$(CPP) -c $(CPPFLAGS) $*.cpp -o $*.o  
-	@$(CPP) -MM $(CPPFLAGS) $*.cpp > $*.d  
-	@mv -f $*.d $*.d.tmp  
-	@sed -e 's|.*:|$*.o:|' < $*.d.tmp > $*.d  
-	@sed -e 's/.*://' -e 's/\\$$//' < $*.d.tmp | fmt -1 | sed -e 's/^ *//' -e 's/$$/:/' >> $*.d
-	@rm -f $*.d.tmp 
+%.cpp.o: %.cpp
+	$(CPP) -c $(CPPFLAGS) $*.cpp -o $*.cpp.o
+	@$(CPP) -MM $(CPPFLAGS) $*.cpp > $*.cpp.d
+	@mv -f $*.cpp.d $*.cpp.d.tmp
+	@sed -e 's|.*:|$*.cpp.o:|' < $*.cpp.d.tmp > $*.cpp.d
+	@sed -e 's/.*://' -e 's/\\$$//' < $*.cpp.d.tmp | fmt -1 | sed -e 's/^ *//' -e 's/$$/:/' >> $*.cpp.d
+	@rm -f $*.cpp.d.tmp
 
-$(C_OBJS): $(C_OBJS:.o=.c)
-	$(CC) -c $(CFLAGS) $*.c -o $*.o
-	@$(CC) -MM $(CFLAGS) $*.c > $*.d  
-	@mv -f $*.d $*.d.tmp  
-	@sed -e 's|.*:|$*.o:|' < $*.d.tmp > $*.d  
-	@sed -e 's/.*://' -e 's/\\$$//' < $*.d.tmp | fmt -1 | sed -e 's/^ *//' -e 's/$$/:/' >> $*.d
-	@rm -f $*.d.tmp 
+%.c.o: %.c
+	$(CC) -c $(CFLAGS) $*.c -o $*.c.o
+	@$(CC) -MM $(CFLAGS) $*.c > $*.c.d
+	@mv -f $*.c.d $*.c.d.tmp
+	@sed -e 's|.*:|$*.c.o:|' < $*.c.d.tmp > $*.c.d
+	@sed -e 's/.*://' -e 's/\\$$//' < $*.c.d.tmp | fmt -1 | sed -e 's/^ *//' -e 's/$$/:/' >> $*.c.d
+	@rm -f $*.c.d.tmp
 
-$(ASM_OBJS): $(ASM_OBJS:.o=.S)
-	$(CC) -c $*.S
-
-../../bin/libcoevent.a:
-	make -C ../../
+%.S.o: %.S
+	$(CC) -c $*.S $*.S.o
 
 # server
 $(TARGET_BIN): $(C_OBJS) $(CPP_OBJS)
+	@echo ""
+	@echo $@ -- $^
 	@echo "$(LD) -r -o $@.o *.o"
 	@$(LD) -r -o $@.o $(C_OBJS) $(CPP_OBJS)
 	$(FINAL_CC) $@.o -o $@ $(LDFLAGS)
