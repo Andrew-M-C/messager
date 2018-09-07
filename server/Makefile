@@ -68,8 +68,6 @@ all: $(TARGET_BIN)
 
 # server
 $(TARGET_BIN): $(C_OBJS) $(CPP_OBJS)
-	@echo ""
-	@echo $@ -- $^
 	@echo "$(LD) -r -o $@.o *.o"
 	@$(LD) -r -o $@.o $(C_OBJS) $(CPP_OBJS)
 	$(FINAL_CC) $@.o -o $@ $(LDFLAGS)
