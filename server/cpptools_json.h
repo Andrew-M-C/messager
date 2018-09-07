@@ -24,7 +24,7 @@ extern rapidjson::Document kDomForAllocator;
 // ==========
 // DOM operations
 
-std::string dom_dump(rapidjson::Document &dom);
+std::string dump(rapidjson::Document &dom);
 
 
 // ==========
@@ -70,32 +70,38 @@ rapidjson::Value &add_array(rapidjson::Value &val, const char *key, rapidjson::D
 rapidjson::Value &add_array(rapidjson::Document &dom, const char *key);
 
 void append(rapidjson::Value &array, rapidjson::Value &val_to_append, rapidjson::Document &dom=kDomForAllocator);
-void append(rapidjson::Value &array, signed char number, rapidjson::Document &dom=kDomForAllocator);
-void append(rapidjson::Value &array, unsigned char number, rapidjson::Document &dom=kDomForAllocator);
-void append(rapidjson::Value &array, signed short number, rapidjson::Document &dom=kDomForAllocator);
-void append(rapidjson::Value &array, unsigned short number, rapidjson::Document &dom=kDomForAllocator);
-void append(rapidjson::Value &array, signed int number, rapidjson::Document &dom=kDomForAllocator);
-void append(rapidjson::Value &array, unsigned int number, rapidjson::Document &dom=kDomForAllocator);
-void append(rapidjson::Value &array, signed long number, rapidjson::Document &dom=kDomForAllocator);
-void append(rapidjson::Value &array, unsigned long number, rapidjson::Document &dom=kDomForAllocator);
-void append(rapidjson::Value &array, signed long long number, rapidjson::Document &dom=kDomForAllocator);
-void append(rapidjson::Value &array, unsigned long long number, rapidjson::Document &dom=kDomForAllocator);
-void append(rapidjson::Value &array, float number, rapidjson::Document &dom=kDomForAllocator);
-void append(rapidjson::Value &array, double number, rapidjson::Document &dom=kDomForAllocator);
+void append_number(rapidjson::Value &array, signed char number, rapidjson::Document &dom=kDomForAllocator);
+void append_number(rapidjson::Value &array, unsigned char number, rapidjson::Document &dom=kDomForAllocator);
+void append_number(rapidjson::Value &array, signed short number, rapidjson::Document &dom=kDomForAllocator);
+void append_number(rapidjson::Value &array, unsigned short number, rapidjson::Document &dom=kDomForAllocator);
+void append_number(rapidjson::Value &array, signed int number, rapidjson::Document &dom=kDomForAllocator);
+void append_number(rapidjson::Value &array, unsigned int number, rapidjson::Document &dom=kDomForAllocator);
+void append_number(rapidjson::Value &array, signed long number, rapidjson::Document &dom=kDomForAllocator);
+void append_number(rapidjson::Value &array, unsigned long number, rapidjson::Document &dom=kDomForAllocator);
+void append_number(rapidjson::Value &array, signed long long number, rapidjson::Document &dom=kDomForAllocator);
+void append_number(rapidjson::Value &array, unsigned long long number, rapidjson::Document &dom=kDomForAllocator);
+void append_number(rapidjson::Value &array, float number, rapidjson::Document &dom=kDomForAllocator);
+void append_number(rapidjson::Value &array, double number, rapidjson::Document &dom=kDomForAllocator);
+void append_bool(rapidjson::Value &array, bool flag, rapidjson::Document &dom=kDomForAllocator);
+void append_string(rapidjson::Value &array, const char *str, rapidjson::Document &dom=kDomForAllocator);
+void append_string(rapidjson::Value &array, const std::string &str, rapidjson::Document &dom=kDomForAllocator);
 
 void append(rapidjson::Document &dom_array, rapidjson::Value &val_to_append);
-void append(rapidjson::Document &dom_array, signed char number);
-void append(rapidjson::Document &dom_array, unsigned char number);
-void append(rapidjson::Document &dom_array, signed short number);
-void append(rapidjson::Document &dom_array, unsigned short number);
-void append(rapidjson::Document &dom_array, signed int number);
-void append(rapidjson::Document &dom_array, unsigned int number);
-void append(rapidjson::Document &dom_array, signed long number);
-void append(rapidjson::Document &dom_array, unsigned long number);
-void append(rapidjson::Document &dom_array, signed long long number);
-void append(rapidjson::Document &dom_array, unsigned long long number);
-void append(rapidjson::Document &dom_array, float number);
-void append(rapidjson::Document &dom_array, double number);
+void append_number(rapidjson::Document &dom_array, signed char number);
+void append_number(rapidjson::Document &dom_array, unsigned char number);
+void append_number(rapidjson::Document &dom_array, signed short number);
+void append_number(rapidjson::Document &dom_array, unsigned short number);
+void append_number(rapidjson::Document &dom_array, signed int number);
+void append_number(rapidjson::Document &dom_array, unsigned int number);
+void append_number(rapidjson::Document &dom_array, signed long number);
+void append_number(rapidjson::Document &dom_array, unsigned long number);
+void append_number(rapidjson::Document &dom_array, signed long long number);
+void append_number(rapidjson::Document &dom_array, unsigned long long number);
+void append_number(rapidjson::Document &dom_array, float number);
+void append_number(rapidjson::Document &dom_array, double number);
+void append_bool(rapidjson::Document &dom_array, bool flag);
+void append_string(rapidjson::Document &dom_array, const char *str);
+void append_string(rapidjson::Document &dom_array, const std::string &str);
 
 }   // end of namepsace json
 }   // end of namepsace cpptools

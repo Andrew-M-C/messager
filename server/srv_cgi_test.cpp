@@ -3,7 +3,7 @@
 #include "cpp_tools.h"
 #include "srv_log.h"
 #include "srv_cgi.h"
-#include "tools_rapidjson.h"
+#include "cpptools_json.h"
 
 #include <stdio.h>
 #include <string>
@@ -12,6 +12,8 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <arpa/inet.h>
+
+using namespace andrewmc;
 
 // ==========
 #define __PUBLIC_FUNCTIONS
@@ -25,7 +27,7 @@ void andrewmc::messager::server::cgi::test::process(andrewmc::libcoevent::TCPSer
 {
     int port = server->port();
     char str_buff[1024] = "";
-    tools::json::init(resp);
+    resp.SetObject();
 
     log::DEBUG("Got data body:\n%s", andrewmc::cpptools::dump_data_to_string(post_data).c_str());
 
@@ -41,7 +43,7 @@ void andrewmc::messager::server::cgi::test::process(andrewmc::libcoevent::TCPSer
             sprintf(str_buff, "%04d-%02d-%02d, %02d:%02d:%02d", 
                     currTime.tm_year + 1900, currTime.tm_mon + 1, currTime.tm_mday,
                     currTime.tm_hour, currTime.tm_min, currTime.tm_sec);
-            tools::json::add_string(resp, "server time", str_buff);
+            cpptools::json::add_string(resp, "server time", str_buff);
         }
     }
 
@@ -52,7 +54,7 @@ void andrewmc::messager::server::cgi::test::process(andrewmc::libcoevent::TCPSer
         if (iter_addr != session_para.end() && iter_port != session_para.end())
         {
             sprintf(str_buff, "%s:%s", iter_addr->second.c_str(), iter_port->second.c_str());
-            tools::json::add_string(resp, "server client", str_buff);
+            cpptools::json::add_string(resp, "server client", str_buff);
         }
     }
 
@@ -63,7 +65,7 @@ void andrewmc::messager::server::cgi::test::process(andrewmc::libcoevent::TCPSer
         if (iter_host != session_para.end() && iter_cgi != session_para.end())
         {
             sprintf(str_buff, "https://%s%s", iter_host->second.c_str(), iter_cgi->second.c_str());
-            tools::json::add_string(resp, "URL", str_buff);
+            cpptools::json::add_string(resp, "URL", str_buff);
         }
     }
 
@@ -71,21 +73,26 @@ void andrewmc::messager::server::cgi::test::process(andrewmc::libcoevent::TCPSer
     {
         std::map<std::string, std::string>::iterator iter_agent = session_para.find("User-Agent");
         if (iter_agent != session_para.end()) {
-            tools::json::add_string(resp, "User-Agent", iter_agent->second.c_str());
+            cpptools::json::add_string(resp, "User-Agent", iter_agent->second.c_str());
         }
     }
 
     // server infomations
     {
-        rapidjson::Value &server_info = tools::json::add_object(resp, "server info");
-        tools::json::add_number(server_info, "server ID", port, resp);
-        tools::json::add_bool(server_info, "true", TRUE, resp);
-        tools::json::add_bool(server_info, "false", FALSE, resp);
+        rapidjson::Value &server_info = cpptools::json::add_object(resp, "server info");
+        cpptools::json::add_number(server_info, "server ID", port, resp);
+        cpptools::json::add_bool(server_info, "true", TRUE, resp);
+        cpptools::json::add_bool(server_info, "false", FALSE, resp);
 
-        rapidjson::Value &misc_info = tools::json::add_array(server_info, "misc info", resp);
-        tools::json::array_push(misc_info, "Hello", resp);
-        tools::json::array_push(misc_info, "array", resp);
-        tools::json::array_push(misc_info, 1234, resp);
+        rapidjson::Value &misc_info = cpptools::json::add_array(server_info, "array info", resp);
+        cpptools::json::append_string(misc_info, "Hello", resp);
+        cpptools::json::append_string(misc_info, "array", resp);
+        cpptools::json::append_number(misc_info, 1234, resp);
+        cpptools::json::append_bool(misc_info, false, resp);
+
+        rapidjson::Value &obj_info = cpptools::json::add_object(server_info, "obj info");
+        cpptools::json::add_object(obj_info, "obj info");
+        cpptools::json::add_string(obj_info, "str", "a string inside");
     }
 
     // return

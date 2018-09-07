@@ -12,13 +12,13 @@
 using namespace andrewmc::cpptools::json;
 
 #define _DEBUG(fmt, args...)    printf("## " __FILE__ ", %d: " fmt "\n", __LINE__, ##args)
-rapidjson::Document kDomForAllocator;
+rapidjson::Document andrewmc::cpptools::json::kDomForAllocator;
 
 // ==========
 #define __DOCUMENT_FUNCTIONS
 #ifdef __DOCUMENT_FUNCTIONS
 
-std::string andrewmc::cpptools::json::dom_dump(rapidjson::Document &dom)
+std::string andrewmc::cpptools::json::dump(rapidjson::Document &dom)
 {
     rapidjson::StringBuffer buffer;
     rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
@@ -517,7 +517,8 @@ rapidjson::Value &andrewmc::cpptools::json::add_object(rapidjson::Value &val, co
     rapidjson::Value strKey(rapidjson::kStringType);
 
     strKey.SetString(key, strlen(key), allocator);
-    return val.AddMember(strKey, objValue, allocator);
+    val.AddMember(strKey, objValue, allocator);
+    return val[key];
 }
 
 
@@ -531,7 +532,8 @@ rapidjson::Value &andrewmc::cpptools::json::add_object(rapidjson::Document &dom,
     rapidjson::Value strKey(rapidjson::kStringType);
 
     strKey.SetString(key, strlen(key), allocator);
-    return dom.AddMember(strKey, objValue, allocator);
+    dom.AddMember(strKey, objValue, allocator);
+    return dom[key];
 }
 
 #endif  // end of __ADD_OBJECT_FUNCTIONS
@@ -551,7 +553,8 @@ rapidjson::Value &andrewmc::cpptools::json::add_array(rapidjson::Value &val, con
     rapidjson::Value strKey(rapidjson::kStringType);
 
     strKey.SetString(key, strlen(key), allocator);
-    return val.AddMember(strKey, arrayValue, allocator);
+    val.AddMember(strKey, arrayValue, allocator);
+    return val[key];
 }
 
 
@@ -565,7 +568,8 @@ rapidjson::Value &andrewmc::cpptools::json::add_array(rapidjson::Document &dom, 
     rapidjson::Value strKey(rapidjson::kStringType);
 
     strKey.SetString(key, strlen(key), allocator);
-    return dom.AddMember(strKey, arrayValue, allocator);
+    dom.AddMember(strKey, arrayValue, allocator);
+    return dom[key];
 }
 
 #endif  // end of __ADD_ARRAY_FUNCTIONS
@@ -582,7 +586,7 @@ void andrewmc::cpptools::json::append(rapidjson::Value &array, rapidjson::Value 
 }
 
 
-void andrewmc::cpptools::json::append(rapidjson::Value &array, signed char number, rapidjson::Document &dom)
+void andrewmc::cpptools::json::append_number(rapidjson::Value &array, signed char number, rapidjson::Document &dom)
 {
     rapidjson::Value numValue(rapidjson::kNumberType);
     numValue.SetInt(number);
@@ -591,7 +595,7 @@ void andrewmc::cpptools::json::append(rapidjson::Value &array, signed char numbe
 }
 
 
-void andrewmc::cpptools::json::append(rapidjson::Value &array, unsigned char number, rapidjson::Document &dom)
+void andrewmc::cpptools::json::append_number(rapidjson::Value &array, unsigned char number, rapidjson::Document &dom)
 {
     rapidjson::Value numValue(rapidjson::kNumberType);
     numValue.SetUint(number);
@@ -600,7 +604,7 @@ void andrewmc::cpptools::json::append(rapidjson::Value &array, unsigned char num
 }
 
 
-void andrewmc::cpptools::json::append(rapidjson::Value &array, signed short number, rapidjson::Document &dom)
+void andrewmc::cpptools::json::append_number(rapidjson::Value &array, signed short number, rapidjson::Document &dom)
 {
     rapidjson::Value numValue(rapidjson::kNumberType);
     numValue.SetInt(number);
@@ -609,7 +613,7 @@ void andrewmc::cpptools::json::append(rapidjson::Value &array, signed short numb
 }
 
 
-void andrewmc::cpptools::json::append(rapidjson::Value &array, unsigned short number, rapidjson::Document &dom)
+void andrewmc::cpptools::json::append_number(rapidjson::Value &array, unsigned short number, rapidjson::Document &dom)
 {
     rapidjson::Value numValue(rapidjson::kNumberType);
     numValue.SetUint(number);
@@ -618,7 +622,7 @@ void andrewmc::cpptools::json::append(rapidjson::Value &array, unsigned short nu
 }
 
 
-void andrewmc::cpptools::json::append(rapidjson::Value &array, signed int number, rapidjson::Document &dom)
+void andrewmc::cpptools::json::append_number(rapidjson::Value &array, signed int number, rapidjson::Document &dom)
 {
     rapidjson::Value numValue(rapidjson::kNumberType);
     numValue.SetInt(number);
@@ -627,7 +631,7 @@ void andrewmc::cpptools::json::append(rapidjson::Value &array, signed int number
 }
 
 
-void andrewmc::cpptools::json::append(rapidjson::Value &array, unsigned int number, rapidjson::Document &dom)
+void andrewmc::cpptools::json::append_number(rapidjson::Value &array, unsigned int number, rapidjson::Document &dom)
 {
     rapidjson::Value numValue(rapidjson::kNumberType);
     numValue.SetUint(number);
@@ -636,7 +640,7 @@ void andrewmc::cpptools::json::append(rapidjson::Value &array, unsigned int numb
 }
 
 
-void andrewmc::cpptools::json::append(rapidjson::Value &array, signed long number, rapidjson::Document &dom)
+void andrewmc::cpptools::json::append_number(rapidjson::Value &array, signed long number, rapidjson::Document &dom)
 {
     rapidjson::Value numValue(rapidjson::kNumberType);
     numValue.SetInt64(number);
@@ -645,7 +649,7 @@ void andrewmc::cpptools::json::append(rapidjson::Value &array, signed long numbe
 }
 
 
-void andrewmc::cpptools::json::append(rapidjson::Value &array, unsigned long number, rapidjson::Document &dom)
+void andrewmc::cpptools::json::append_number(rapidjson::Value &array, unsigned long number, rapidjson::Document &dom)
 {
     rapidjson::Value numValue(rapidjson::kNumberType);
     numValue.SetUint64(number);
@@ -654,7 +658,7 @@ void andrewmc::cpptools::json::append(rapidjson::Value &array, unsigned long num
 }
 
 
-void andrewmc::cpptools::json::append(rapidjson::Value &array, signed long long number, rapidjson::Document &dom)
+void andrewmc::cpptools::json::append_number(rapidjson::Value &array, signed long long number, rapidjson::Document &dom)
 {
     rapidjson::Value numValue(rapidjson::kNumberType);
     numValue.SetInt64(number);
@@ -663,7 +667,7 @@ void andrewmc::cpptools::json::append(rapidjson::Value &array, signed long long 
 }
 
 
-void andrewmc::cpptools::json::append(rapidjson::Value &array, unsigned long long number, rapidjson::Document &dom)
+void andrewmc::cpptools::json::append_number(rapidjson::Value &array, unsigned long long number, rapidjson::Document &dom)
 {
     rapidjson::Value numValue(rapidjson::kNumberType);
     numValue.SetUint64(number);
@@ -672,7 +676,7 @@ void andrewmc::cpptools::json::append(rapidjson::Value &array, unsigned long lon
 }
 
 
-void andrewmc::cpptools::json::append(rapidjson::Value &array, float number, rapidjson::Document &dom)
+void andrewmc::cpptools::json::append_number(rapidjson::Value &array, float number, rapidjson::Document &dom)
 {
     rapidjson::Value numValue(rapidjson::kNumberType);
     numValue.SetDouble(number);
@@ -681,11 +685,40 @@ void andrewmc::cpptools::json::append(rapidjson::Value &array, float number, rap
 }
 
 
-void andrewmc::cpptools::json::append(rapidjson::Value &array, double number, rapidjson::Document &dom)
+void andrewmc::cpptools::json::append_number(rapidjson::Value &array, double number, rapidjson::Document &dom)
 {
     rapidjson::Value numValue(rapidjson::kNumberType);
     numValue.SetDouble(number);
     array.PushBack(numValue, dom.GetAllocator());
+    return;
+}
+
+
+void andrewmc::cpptools::json::append_bool(rapidjson::Value &array, bool flag, rapidjson::Document &dom)
+{
+    rapidjson::Value boolValue(flag ? rapidjson::kTrueType : rapidjson::kFalseType);
+    array.PushBack(boolValue, dom.GetAllocator());
+    return;
+}
+
+
+void andrewmc::cpptools::json::append_string(rapidjson::Value &array, const char *str, rapidjson::Document &dom)
+{
+    if (NULL == str) {
+        str = "";
+    }
+    rapidjson::Value strValue(rapidjson::kStringType);
+    strValue.SetString(str, strlen(str), dom.GetAllocator());
+    array.PushBack(strValue, dom.GetAllocator());
+    return;
+}
+
+
+void andrewmc::cpptools::json::append_string(rapidjson::Value &array, const std::string &str, rapidjson::Document &dom)
+{
+    rapidjson::Value strValue(rapidjson::kStringType);
+    strValue.SetString(str.c_str(), str.length(), dom.GetAllocator());
+    array.PushBack(strValue, dom.GetAllocator());
     return;
 }
 
@@ -703,7 +736,7 @@ void andrewmc::cpptools::json::append(rapidjson::Document &dom_array, rapidjson:
 }
 
 
-void andrewmc::cpptools::json::append(rapidjson::Document &dom_array, signed char number)
+void andrewmc::cpptools::json::append_number(rapidjson::Document &dom_array, signed char number)
 {
     rapidjson::Value numValue(rapidjson::kNumberType);
     numValue.SetInt(number);
@@ -712,7 +745,7 @@ void andrewmc::cpptools::json::append(rapidjson::Document &dom_array, signed cha
 }
 
 
-void andrewmc::cpptools::json::append(rapidjson::Document &dom_array, unsigned char number)
+void andrewmc::cpptools::json::append_number(rapidjson::Document &dom_array, unsigned char number)
 {
     rapidjson::Value numValue(rapidjson::kNumberType);
     numValue.SetUint(number);
@@ -721,7 +754,7 @@ void andrewmc::cpptools::json::append(rapidjson::Document &dom_array, unsigned c
 }
 
 
-void andrewmc::cpptools::json::append(rapidjson::Document &dom_array, signed short number)
+void andrewmc::cpptools::json::append_number(rapidjson::Document &dom_array, signed short number)
 {
     rapidjson::Value numValue(rapidjson::kNumberType);
     numValue.SetInt(number);
@@ -730,7 +763,7 @@ void andrewmc::cpptools::json::append(rapidjson::Document &dom_array, signed sho
 }
 
 
-void andrewmc::cpptools::json::append(rapidjson::Document &dom_array, unsigned short number)
+void andrewmc::cpptools::json::append_number(rapidjson::Document &dom_array, unsigned short number)
 {
     rapidjson::Value numValue(rapidjson::kNumberType);
     numValue.SetUint(number);
@@ -739,7 +772,7 @@ void andrewmc::cpptools::json::append(rapidjson::Document &dom_array, unsigned s
 }
 
 
-void andrewmc::cpptools::json::append(rapidjson::Document &dom_array, signed int number)
+void andrewmc::cpptools::json::append_number(rapidjson::Document &dom_array, signed int number)
 {
     rapidjson::Value numValue(rapidjson::kNumberType);
     numValue.SetInt(number);
@@ -748,7 +781,7 @@ void andrewmc::cpptools::json::append(rapidjson::Document &dom_array, signed int
 }
 
 
-void andrewmc::cpptools::json::append(rapidjson::Document &dom_array, unsigned int number)
+void andrewmc::cpptools::json::append_number(rapidjson::Document &dom_array, unsigned int number)
 {
     rapidjson::Value numValue(rapidjson::kNumberType);
     numValue.SetUint(number);
@@ -757,7 +790,7 @@ void andrewmc::cpptools::json::append(rapidjson::Document &dom_array, unsigned i
 }
 
 
-void andrewmc::cpptools::json::append(rapidjson::Document &dom_array, signed long number)
+void andrewmc::cpptools::json::append_number(rapidjson::Document &dom_array, signed long number)
 {
     rapidjson::Value numValue(rapidjson::kNumberType);
     numValue.SetInt64(number);
@@ -766,7 +799,7 @@ void andrewmc::cpptools::json::append(rapidjson::Document &dom_array, signed lon
 }
 
 
-void andrewmc::cpptools::json::append(rapidjson::Document &dom_array, unsigned long number)
+void andrewmc::cpptools::json::append_number(rapidjson::Document &dom_array, unsigned long number)
 {
     rapidjson::Value numValue(rapidjson::kNumberType);
     numValue.SetUint64(number);
@@ -775,7 +808,7 @@ void andrewmc::cpptools::json::append(rapidjson::Document &dom_array, unsigned l
 }
 
 
-void andrewmc::cpptools::json::append(rapidjson::Document &dom_array, signed long long number)
+void andrewmc::cpptools::json::append_number(rapidjson::Document &dom_array, signed long long number)
 {
     rapidjson::Value numValue(rapidjson::kNumberType);
     numValue.SetInt64(number);
@@ -784,7 +817,7 @@ void andrewmc::cpptools::json::append(rapidjson::Document &dom_array, signed lon
 }
 
 
-void andrewmc::cpptools::json::append(rapidjson::Document &dom_array, unsigned long long number)
+void andrewmc::cpptools::json::append_number(rapidjson::Document &dom_array, unsigned long long number)
 {
     rapidjson::Value numValue(rapidjson::kNumberType);
     numValue.SetUint64(number);
@@ -793,7 +826,7 @@ void andrewmc::cpptools::json::append(rapidjson::Document &dom_array, unsigned l
 }
 
 
-void andrewmc::cpptools::json::append(rapidjson::Document &dom_array, float number)
+void andrewmc::cpptools::json::append_number(rapidjson::Document &dom_array, float number)
 {
     rapidjson::Value numValue(rapidjson::kNumberType);
     numValue.SetDouble(number);
@@ -802,11 +835,40 @@ void andrewmc::cpptools::json::append(rapidjson::Document &dom_array, float numb
 }
 
 
-void andrewmc::cpptools::json::append(rapidjson::Document &dom_array, double number)
+void andrewmc::cpptools::json::append_number(rapidjson::Document &dom_array, double number)
 {
     rapidjson::Value numValue(rapidjson::kNumberType);
     numValue.SetDouble(number);
     dom_array.PushBack(numValue, dom_array.GetAllocator());
+    return;
+}
+
+
+void andrewmc::cpptools::json::append_bool(rapidjson::Document &dom_array, bool flag)
+{
+    rapidjson::Value boolValue(flag ? rapidjson::kTrueType : rapidjson::kFalseType);
+    dom_array.PushBack(boolValue, dom_array.GetAllocator());
+    return;
+}
+
+
+void andrewmc::cpptools::json::append_string(rapidjson::Document &dom_array, const char *str)
+{
+    if (NULL == str) {
+        str = "";
+    }
+    rapidjson::Value strValue(rapidjson::kStringType);
+    strValue.SetString(str, strlen(str), dom_array.GetAllocator());
+    dom_array.PushBack(strValue, dom_array.GetAllocator());
+    return;
+}
+
+
+void andrewmc::cpptools::json::append_string(rapidjson::Document &dom_array, const std::string &str)
+{
+    rapidjson::Value strValue(rapidjson::kStringType);
+    strValue.SetString(str.c_str(), str.length(), dom_array.GetAllocator());
+    dom_array.PushBack(strValue, dom_array.GetAllocator());
     return;
 }
 

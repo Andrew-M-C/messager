@@ -3,7 +3,7 @@
 #include "cpp_tools.h"
 #include "srv_log.h"
 #include "srv_cgi.h"
-#include "tools_rapidjson.h"
+#include "cpptools_json.h"
 
 #include <stdio.h>
 #include <string>
@@ -13,11 +13,12 @@
 #include <stdarg.h>
 #include <arpa/inet.h>
 
+using namespace andrewmc;
 using namespace andrewmc::libcoevent;
 using namespace andrewmc::cpptools;
 using namespace andrewmc::messager::server;
 
-#define _CGI_PORT       (32222)
+#define _CGI_PORT       (23333)
 
 // ==========
 #define __CGI_DEFINITIONS
@@ -164,8 +165,6 @@ static void _cgi_session(evutil_socket_t fd, Event *event, void *arg)
                 url = full_url;
             }
         }
-
-        tools::json::init(resp);
         
         // find handler
         std::map<std::string, CgiProcessor>::iterator handler = g_cgi_processors.find(url);
@@ -184,7 +183,7 @@ static void _cgi_session(evutil_socket_t fd, Event *event, void *arg)
 
         // append body
         {
-            std::string jsonStr = tools::json::dump(resp);
+            std::string jsonStr = cpptools::json::dump(resp);
             size_t len = jsonStr.length();
 
             data_buff.append(jsonStr.c_str(), len);
