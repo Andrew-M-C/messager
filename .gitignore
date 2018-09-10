@@ -37,3 +37,6 @@ msg-server
 # OS files
 .DS_Store
 ._*
+
+# nohop output files
+nohup.out

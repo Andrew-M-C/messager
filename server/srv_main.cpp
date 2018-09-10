@@ -4,6 +4,7 @@
 #include "srv_log.h"
 #include "srv_cgi.h"
 #include "cpptools_json.h"
+#include "cpptools_daemon.h"
 
 #include <stdio.h>
 #include <string>
@@ -12,6 +13,9 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <arpa/inet.h>
+
+#include <string.h>
+#include <errno.h>
 
 using namespace andrewmc;
 using namespace andrewmc::libcoevent;
@@ -213,6 +217,29 @@ static void _cgi_session(evutil_socket_t fd, Event *event, void *arg)
 
 int main(int argc, char *argv[])
 {
+    // daemonize
+    cpptools::daemonize::Info dae_info;
+    cpptools::daemonize::Config dae_conf;
+
+    dae_conf.should_change_path = false;
+    dae_conf.should_kill_stdout = false;
+    dae_conf.pid_file_path = cpptools::daemonize::home_dir() + std::string("/data/msg_server.pid");
+
+    int daemon_stat = cpptools::daemonize::daemonize(dae_conf, dae_info);
+    if (daemon_stat < 0) {
+        log::ERROR("Failed to daemonize: %s", strerror(errno));
+        return 1;
+    }
+
+    if (dae_info.self_pid != dae_info.exist_pid) {
+        log::NOTICE("Server already running, pid: %u", (unsigned)dae_info.exist_pid);
+        return 0;
+    }
+    else {
+        log::INFO("Server run at pid %u", (unsigned)dae_info.exist_pid);
+    }
+
+    // start server
     Base *base = new Base;
     Error status;
     TCPServer *server = new TCPServer;
